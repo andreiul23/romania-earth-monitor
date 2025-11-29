@@ -100,15 +100,15 @@ export function Landing() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <Link to="/dashboard">
+              <Link to="/public">
                 <Button variant="hero" size="xl" className="group">
-                  Open Dashboard
+                  Check Hazard Status
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link to="/about">
+              <Link to="/auth">
                 <Button variant="glass" size="xl">
-                  Learn More
+                  Institutional Access
                 </Button>
               </Link>
             </div>

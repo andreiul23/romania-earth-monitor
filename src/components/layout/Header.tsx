@@ -2,18 +2,39 @@ import { Link, useLocation } from "react-router-dom";
 import { SafeRoLogo } from "@/components/icons/SafeRoLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Satellite, LayoutDashboard, Info, Menu, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { 
+  Satellite, 
+  LayoutDashboard, 
+  Info, 
+  Menu, 
+  X, 
+  Users, 
+  Shield,
+  LogOut,
+  LogIn
+} from "lucide-react";
 import { useState } from "react";
 
-const navItems = [
+const publicNavItems = [
   { path: "/", label: "Home", icon: Satellite },
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/public", label: "Public Status", icon: Users },
   { path: "/about", label: "About", icon: Info },
+];
+
+const institutionalNavItems = [
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
 ];
 
 export function Header() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass-panel border-b border-border/50">
@@ -32,7 +53,27 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {publicNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path;
+              return (
+                <Link key={item.path} to={item.path}>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "gap-2 transition-all duration-200",
+                      isActive && "bg-secondary text-foreground"
+                    )}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </Button>
+                </Link>
+              );
+            })}
+
+            {/* Institutional items (only if logged in) */}
+            {user && institutionalNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
               return (
@@ -52,12 +93,27 @@ export function Header() {
             })}
           </nav>
 
-          {/* Status Indicator */}
+          {/* Auth Section */}
           <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30">
-              <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              <span className="text-xs font-medium text-accent">Demo Mode</span>
-            </div>
+            {user ? (
+              <>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-primary">Institutional</span>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LogIn className="w-4 h-4" />
+                  Institutional Login
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -78,7 +134,7 @@ export function Header() {
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <div className="flex flex-col gap-2">
-              {navItems.map((item) => {
+              {publicNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
@@ -100,6 +156,53 @@ export function Header() {
                   </Link>
                 );
               })}
+
+              {user && (
+                <>
+                  <div className="border-t border-border my-2" />
+                  {institutionalNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Button
+                          variant="ghost"
+                          className={cn(
+                            "w-full justify-start gap-3",
+                            isActive && "bg-secondary"
+                          )}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {item.label}
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </>
+              )}
+
+              <div className="border-t border-border my-2" />
+              {user ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start gap-3">
+                    <LogIn className="w-4 h-4" />
+                    Institutional Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </nav>
         )}
