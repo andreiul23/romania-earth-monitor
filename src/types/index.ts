@@ -7,7 +7,19 @@ export interface Region {
   zoom: number;
 }
 
-export type HazardType = 'flood' | 'vegetation' | 'hybrid';
+export type HazardType = 'flood' | 'vegetation' | 'fire' | 'hybrid';
+
+export interface VolunteerAnnouncement {
+  id: string;
+  region_id: string;
+  region_name: string;
+  hazard_type: string;
+  message: string;
+  is_active: boolean;
+  created_by?: string;
+  created_at: string;
+  expires_at?: string;
+}
 export type AcquisitionMode = 'auto' | 'optical' | 'radar';
 
 export interface AcquisitionRequest {
