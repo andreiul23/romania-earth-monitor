@@ -20,10 +20,13 @@ import {
   AlertTriangle,
   Activity,
   CloudRain,
-  Sun
+  Sun,
+  Flame,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ControlPanelProps {
   regions: Region[];
@@ -40,6 +43,7 @@ interface ControlPanelProps {
 const hazardTypes: { value: HazardType; label: string; icon: typeof Waves; color: string }[] = [
   { value: "flood", label: "Flood Detection", icon: Waves, color: "text-flood" },
   { value: "vegetation", label: "Vegetation Health", icon: Leaf, color: "text-vegetation" },
+  { value: "fire", label: "Fire Detection", icon: Flame, color: "text-danger" },
   { value: "hybrid", label: "Hybrid Analysis", icon: Layers, color: "text-alert" },
 ];
 
@@ -62,6 +66,7 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const [acquisitionMode, setAcquisitionMode] = useState<AcquisitionMode>("auto");
   const [opacity, setOpacity] = useState([70]);
+  const [isPostingAnnouncement, setIsPostingAnnouncement] = useState(false);
 
   const handleAcquisition = () => {
     if (!selectedRegion) {
@@ -70,6 +75,35 @@ export function ControlPanel({
     }
     onRunAcquisition(acquisitionMode);
     toast.success(`Starting ${acquisitionMode} acquisition for ${selectedRegion.displayName}`);
+  };
+
+  const handlePostVolunteerAnnouncement = async () => {
+    if (!selectedRegion) {
+      toast.error("Please select a region first");
+      return;
+    }
+    if (summary?.risk_level !== "high" && summary?.risk_level !== "critical") {
+      toast.error("Volunteer announcements are only available for high-risk zones");
+      return;
+    }
+
+    setIsPostingAnnouncement(true);
+    try {
+      const { error } = await supabase.from("volunteer_announcements").insert({
+        region_id: selectedRegion.id,
+        region_name: selectedRegion.displayName,
+        hazard_type: hazardType,
+        message: `Volunteers needed in ${selectedRegion.displayName} due to ${hazardType} hazard. Risk level: ${summary?.risk_level.toUpperCase()}`,
+        is_active: true,
+      });
+
+      if (error) throw error;
+      toast.success("Volunteer announcement posted successfully!");
+    } catch {
+      toast.error("Failed to post announcement. You may not have permission.");
+    } finally {
+      setIsPostingAnnouncement(false);
+    }
   };
 
   const riskColors = {
@@ -216,6 +250,19 @@ export function ControlPanel({
             <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
             Refresh Analysis
           </Button>
+          
+          {/* Volunteer Announcement Button */}
+          {summary && (summary.risk_level === "high" || summary.risk_level === "critical") && (
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handlePostVolunteerAnnouncement}
+              disabled={!selectedRegion || isPostingAnnouncement}
+            >
+              <Users className="w-4 h-4" />
+              {isPostingAnnouncement ? "Posting..." : "Request Volunteers"}
+            </Button>
+          )}
         </div>
 
         {/* Summary Stats */}

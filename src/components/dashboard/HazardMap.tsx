@@ -1,6 +1,6 @@
 import type { Region, HazardType } from "@/types";
 import { cn } from "@/lib/utils";
-import { MapPin, Satellite, Waves, Leaf, Layers } from "lucide-react";
+import { MapPin, Satellite, Waves, Leaf, Layers, Flame } from "lucide-react";
 
 interface HazardMapProps {
   region: Region | null;
@@ -11,6 +11,7 @@ interface HazardMapProps {
 const hazardConfig: Record<HazardType, { color: string; icon: typeof Waves; label: string }> = {
   flood: { color: "#0ea5e9", icon: Waves, label: "Flood Risk" },
   vegetation: { color: "#22c55e", icon: Leaf, label: "Vegetation Health" },
+  fire: { color: "#ef4444", icon: Flame, label: "Fire Risk" },
   hybrid: { color: "#f97316", icon: Layers, label: "Combined Hazard" },
 };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +17,12 @@ import {
   CheckCircle2,
   Clock,
   Mail,
-  ChevronRight
+  ChevronRight,
+  Flame,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { VolunteerAnnouncement } from "@/types";
 
 type RiskLevel = "low" | "medium" | "high" | "critical";
 
@@ -30,6 +33,7 @@ interface RegionStatus {
   riskLevel: RiskLevel;
   floodRisk: number;
   vegetationHealth: number;
+  fireRisk: number;
   lastUpdated: string;
   alerts: number;
 }
@@ -38,10 +42,12 @@ interface RegionStatus {
 const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region) => {
   const floodRisk = Math.random() * 100;
   const vegetationHealth = 30 + Math.random() * 60;
+  const fireRisk = Math.random() * 100;
+  const maxRisk = Math.max(floodRisk, fireRisk);
   const riskLevel: RiskLevel = 
-    floodRisk > 70 ? "critical" : 
-    floodRisk > 50 ? "high" : 
-    floodRisk > 25 ? "medium" : "low";
+    maxRisk > 70 ? "critical" : 
+    maxRisk > 50 ? "high" : 
+    maxRisk > 25 ? "medium" : "low";
   
   return {
     id: region.id,
@@ -50,6 +56,7 @@ const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region) => {
     riskLevel,
     floodRisk: Math.round(floodRisk),
     vegetationHealth: Math.round(vegetationHealth),
+    fireRisk: Math.round(fireRisk),
     lastUpdated: new Date(Date.now() - Math.random() * 3600000).toISOString(),
     alerts: riskLevel === "critical" ? 2 : riskLevel === "high" ? 1 : 0,
   };
@@ -67,6 +74,22 @@ export function Public() {
   const [subscribeEmail, setSubscribeEmail] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [volunteerAnnouncements, setVolunteerAnnouncements] = useState<VolunteerAnnouncement[]>([]);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      const { data } = await supabase
+        .from("volunteer_announcements")
+        .select("*")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      
+      if (data) {
+        setVolunteerAnnouncements(data as VolunteerAnnouncement[]);
+      }
+    };
+    fetchAnnouncements();
+  }, []);
 
   const filteredRegions = regionStatuses.filter((region) =>
     region.displayName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -85,7 +108,7 @@ export function Public() {
         .insert({
           email: subscribeEmail,
           region_id: selectedRegion,
-          hazard_types: ["flood", "vegetation"],
+          hazard_types: ["flood", "vegetation", "fire"],
         });
 
       if (error) throw error;
@@ -130,6 +153,35 @@ export function Public() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Volunteer Announcements */}
+        {volunteerAnnouncements.length > 0 && (
+          <div className="mb-8 space-y-3">
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-primary" />
+              <h2 className="font-semibold">Volunteer Requests</h2>
+            </div>
+            {volunteerAnnouncements.map((announcement) => (
+              <div
+                key={announcement.id}
+                className="p-4 rounded-xl bg-primary/10 border border-primary/30"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-medium text-primary">{announcement.region_name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Posted: {new Date(announcement.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <Badge className="bg-primary/20 text-primary">
+                    {announcement.hazard_type}
+                  </Badge>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -193,6 +245,29 @@ export function Public() {
                           region.floodRisk > 25 ? "bg-primary" : "bg-vegetation"
                         )}
                         style={{ width: `${region.floodRisk}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fire Risk */}
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="text-muted-foreground flex items-center gap-1">
+                        <Flame className="w-3 h-3" /> Fire Risk
+                      </span>
+                      <span className={region.fireRisk > 50 ? "text-danger" : "text-foreground"}>
+                        {region.fireRisk}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          region.fireRisk > 70 ? "bg-danger" :
+                          region.fireRisk > 50 ? "bg-alert" :
+                          region.fireRisk > 25 ? "bg-primary" : "bg-vegetation"
+                        )}
+                        style={{ width: `${region.fireRisk}%` }}
                       />
                     </div>
                   </div>
