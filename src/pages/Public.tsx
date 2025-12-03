@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { MOCK_REGIONS } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const emailSchema = z.string()
+  .trim()
+  .email("Please enter a valid email address")
+  .max(255, "Email is too long");
 import { 
   Search, 
   Bell, 
@@ -96,8 +102,15 @@ export function Public() {
   );
 
   const handleSubscribe = async () => {
-    if (!subscribeEmail || !selectedRegion) {
-      toast.error("Please enter your email and select a region");
+    if (!selectedRegion) {
+      toast.error("Please select a region");
+      return;
+    }
+
+    // Validate email with Zod
+    const emailResult = emailSchema.safeParse(subscribeEmail);
+    if (!emailResult.success) {
+      toast.error(emailResult.error.errors[0].message);
       return;
     }
 
@@ -106,7 +119,7 @@ export function Public() {
       const { error } = await supabase
         .from("alert_subscriptions")
         .insert({
-          email: subscribeEmail,
+          email: emailResult.data,
           region_id: selectedRegion,
           hazard_types: ["flood", "vegetation", "fire"],
         });
