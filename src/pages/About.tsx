@@ -90,21 +90,21 @@ const architecture = [
 export function About() {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+      <div className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 max-w-5xl">
         {/* Header */}
-        <div className="text-center mb-16">
-          <img src={saferoLogo} alt="safeRo Logo" className="w-32 h-32 mx-auto mb-6 object-contain" />
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">About SAFE-RO</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <div className="text-center mb-10 sm:mb-16">
+          <img src={saferoLogo} alt="safeRo Logo" className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 object-contain" />
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">About SAFE-RO</h1>
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
             A dual-interface software platform designed to monitor natural hazards in Romania 
             using Earth Observation data from the Copernicus programme.
           </p>
         </div>
 
         {/* Mission */}
-        <section className="mb-16">
-          <div className="glass-panel-elevated p-8">
-            <h2 className="text-2xl font-bold mb-4">Mission</h2>
+        <section className="mb-10 sm:mb-16">
+          <div className="glass-panel-elevated p-4 sm:p-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Mission</h2>
             <p className="text-muted-foreground leading-relaxed">
               SAFE-RO bridges the gap between raw satellite telemetry and local crisis management 
               by processing data from Google Earth Engine (Sentinel-2) and NASA FIRMS into actionable insights. 
@@ -115,23 +115,23 @@ export function About() {
         </section>
 
         {/* Sensors */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Satellite className="w-6 h-6 text-primary" />
+        <section className="mb-10 sm:mb-16">
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+            <Satellite className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             Satellite Sensors
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
             {sensors.map((sensor) => {
               const Icon = sensor.icon;
               return (
-                <div key={sensor.name} className="glass-panel-elevated p-6 space-y-4">
+              <div key={sensor.name} className="glass-panel-elevated p-4 sm:p-6 space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
-                      <Icon className={`w-6 h-6 ${sensor.color}`} />
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
+                      <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${sensor.color}`} />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{sensor.name}</h3>
-                      <p className="text-sm text-muted-foreground">{sensor.type}</p>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-base sm:text-lg">{sensor.name}</h3>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">{sensor.type}</p>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">{sensor.description}</p>
@@ -166,21 +166,21 @@ export function About() {
         </section>
 
         {/* Algorithms */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Cpu className="w-6 h-6 text-primary" />
+        <section className="mb-10 sm:mb-16">
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+            <Cpu className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             Processing Algorithms
           </h2>
           <div className="space-y-4">
             {algorithms.map((algo) => (
-              <div key={algo.name} className="glass-panel p-6">
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div key={algo.name} className="glass-panel p-4 sm:p-6">
+                <div className="flex flex-col md:flex-row md:items-center gap-3 sm:gap-4">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">{algo.name}</h3>
-                    <p className="text-sm text-muted-foreground">{algo.description}</p>
+                    <h3 className="font-semibold text-base sm:text-lg mb-1">{algo.name}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{algo.description}</p>
                   </div>
                   <div className="md:text-right">
-                    <code className="text-sm font-mono text-primary bg-primary/10 px-3 py-1.5 rounded-lg">
+                    <code className="text-xs sm:text-sm font-mono text-primary bg-primary/10 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg inline-block">
                       {algo.formula}
                     </code>
                     <p className="text-xs text-muted-foreground mt-2">
@@ -194,12 +194,12 @@ export function About() {
         </section>
 
         {/* Architecture */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Database className="w-6 h-6 text-primary" />
+        <section className="mb-10 sm:mb-16">
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+            <Database className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             System Architecture
           </h2>
-          <div className="glass-panel-elevated p-6">
+          <div className="glass-panel-elevated p-4 sm:p-6">
             <div className="space-y-4">
               {architecture.map((layer, index) => {
                 const Icon = layer.icon;
@@ -230,15 +230,15 @@ export function About() {
         </section>
 
         {/* Data Sources */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Cloud className="w-6 h-6 text-primary" />
+        <section className="mb-10 sm:mb-16">
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+            <Cloud className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             Data Sources
           </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="glass-panel p-6">
-              <h3 className="font-semibold mb-2">Google Earth Engine</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="glass-panel p-4 sm:p-6">
+              <h3 className="font-semibold text-sm sm:text-base mb-2">Google Earth Engine</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                 Cloud-based geospatial analysis platform providing access to Sentinel-2 imagery 
                 for NDVI vegetation health analysis and flood detection algorithms.
               </p>
@@ -253,9 +253,9 @@ export function About() {
                 </Button>
               </a>
             </div>
-            <div className="glass-panel p-6">
-              <h3 className="font-semibold mb-2">NASA FIRMS</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="glass-panel p-4 sm:p-6">
+              <h3 className="font-semibold text-sm sm:text-base mb-2">NASA FIRMS</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                 Fire Information for Resource Management System provides real-time active fire 
                 detection data from VIIRS and MODIS satellite sensors worldwide.
               </p>
@@ -274,10 +274,10 @@ export function About() {
         </section>
 
         {/* Source Code */}
-        <section className="mb-16">
-          <div className="glass-panel-elevated p-8 text-center">
-            <h2 className="text-2xl font-bold mb-4">Open Source</h2>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
+        <section className="mb-10 sm:mb-16">
+          <div className="glass-panel-elevated p-5 sm:p-8 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Open Source</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-xl mx-auto px-2">
               SAFE-RO is open source. The Python backend contains the core processing logic 
               while this React frontend provides the modern web interface.
             </p>
@@ -296,41 +296,41 @@ export function About() {
 
         {/* Hazard Indicators Legend */}
         <section>
-          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-            <Waves className="w-6 h-6 text-primary" />
+          <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+            <Waves className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             Hazard Indicators
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-flood mx-auto mb-2 flex items-center justify-center">
-                <Waves className="w-4 h-4 text-white" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
+            <div className="glass-panel p-3 sm:p-4 text-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-flood mx-auto mb-2 flex items-center justify-center">
+                <Waves className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <h4 className="font-medium text-sm">Flood Risk</h4>
-              <p className="text-xs text-muted-foreground">Water detection zones</p>
+              <h4 className="font-medium text-xs sm:text-sm">Flood Risk</h4>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Water detection zones</p>
             </div>
-            <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-fire mx-auto mb-2 flex items-center justify-center">
-                <Flame className="w-4 h-4 text-white" />
+            <div className="glass-panel p-3 sm:p-4 text-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fire mx-auto mb-2 flex items-center justify-center">
+                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <h4 className="font-medium text-sm">Fire Risk</h4>
-              <p className="text-xs text-muted-foreground">Thermal anomalies</p>
+              <h4 className="font-medium text-xs sm:text-sm">Fire Risk</h4>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Thermal anomalies</p>
             </div>
-            <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-vegetation mx-auto mb-2 flex items-center justify-center">
-                <Leaf className="w-4 h-4 text-white" />
+            <div className="glass-panel p-3 sm:p-4 text-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-vegetation mx-auto mb-2 flex items-center justify-center">
+                <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <h4 className="font-medium text-sm">Vegetation</h4>
-              <p className="text-xs text-muted-foreground">NDVI health index</p>
+              <h4 className="font-medium text-xs sm:text-sm">Vegetation</h4>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">NDVI health index</p>
             </div>
-            <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-alert mx-auto mb-2" />
-              <h4 className="font-medium text-sm">Warning</h4>
-              <p className="text-xs text-muted-foreground">Moderate risk areas</p>
+            <div className="glass-panel p-3 sm:p-4 text-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-alert mx-auto mb-2" />
+              <h4 className="font-medium text-xs sm:text-sm">Warning</h4>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Moderate risk</p>
             </div>
-            <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-danger mx-auto mb-2" />
-              <h4 className="font-medium text-sm">Critical</h4>
-              <p className="text-xs text-muted-foreground">High priority alerts</p>
+            <div className="glass-panel p-3 sm:p-4 text-center">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-danger mx-auto mb-2" />
+              <h4 className="font-medium text-xs sm:text-sm">Critical</h4>
+              <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">High priority</p>
             </div>
           </div>
         </section>
