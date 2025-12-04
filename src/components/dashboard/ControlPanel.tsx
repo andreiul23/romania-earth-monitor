@@ -281,7 +281,8 @@ export function ControlPanel({
                 </Badge>
               </div>
               
-              {summary.flood_percentage !== undefined && (
+              {/* Flood - show for flood and hybrid */}
+              {summary.flood_percentage !== undefined && (hazardType === "flood" || hazardType === "hybrid") && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Flood Coverage</span>
@@ -296,7 +297,8 @@ export function ControlPanel({
                 </div>
               )}
               
-              {summary.fire_percentage !== undefined && (
+              {/* Fire - show for fire and hybrid */}
+              {summary.fire_percentage !== undefined && (hazardType === "fire" || hazardType === "hybrid") && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Fire Risk</span>
@@ -311,7 +313,8 @@ export function ControlPanel({
                 </div>
               )}
 
-              {summary.avg_ndvi !== undefined && (
+              {/* Vegetation NDVI - show for vegetation and hybrid */}
+              {summary.avg_ndvi !== undefined && (hazardType === "vegetation" || hazardType === "hybrid") && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">Avg. NDVI</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { ControlPanel } from "@/components/dashboard/ControlPanel";
+import { VolunteerAnnouncementsPanel } from "@/components/dashboard/VolunteerAnnouncementsPanel";
 import { api, MOCK_REGIONS } from "@/lib/api";
 import type { Region, HazardType, AcquisitionMode, HazardSummary } from "@/types";
 import { toast } from "sonner";
@@ -91,10 +92,13 @@ export function Dashboard() {
             onRefresh={handleRefresh}
           />
         </aside>
-        <div className="flex-1 p-4 min-w-0">
-          <Suspense fallback={<MapFallback />}>
-            <HazardMap region={selectedRegion} hazardType={hazardType} className="h-full w-full" />
-          </Suspense>
+        <div className="flex-1 p-4 min-w-0 flex flex-col gap-4">
+          <div className="flex-1 min-h-0">
+            <Suspense fallback={<MapFallback />}>
+              <HazardMap region={selectedRegion} hazardType={hazardType} className="h-full w-full" />
+            </Suspense>
+          </div>
+          <VolunteerAnnouncementsPanel />
         </div>
       </div>
     </Layout>

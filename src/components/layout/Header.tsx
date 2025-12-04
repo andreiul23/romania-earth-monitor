@@ -1,8 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { SafeRoLogo } from "@/components/icons/SafeRoLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import saferoLogo from "@/assets/safero-logo.png";
 import { 
   Satellite, 
   LayoutDashboard, 
@@ -42,9 +42,13 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <SafeRoLogo size="sm" className="transition-transform group-hover:scale-110" />
+            <img 
+              src={saferoLogo} 
+              alt="SafeRo Logo" 
+              className="h-10 w-10 object-contain transition-transform group-hover:scale-110" 
+            />
             <div className="flex flex-col">
-              <span className="font-bold text-foreground tracking-tight">SAFE-RO</span>
+              <span className="font-bold text-foreground tracking-tight">safeRo</span>
               <span className="text-[10px] text-muted-foreground -mt-1 hidden sm:block">
                 Satellite Hazard Monitoring
               </span>
