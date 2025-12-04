@@ -124,7 +124,7 @@ export function About() {
             {sensors.map((sensor) => {
               const Icon = sensor.icon;
               return (
-              <div key={sensor.name} className="glass-panel-elevated p-4 sm:p-6 space-y-3 sm:space-y-4">
+              <div key={sensor.name} className="glass-panel-elevated p-4 sm:p-6 space-y-3 sm:space-y-4 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary flex items-center justify-center flex-shrink-0">
                       <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${sensor.color}`} />
@@ -173,7 +173,7 @@ export function About() {
           </h2>
           <div className="space-y-4">
             {algorithms.map((algo) => (
-              <div key={algo.name} className="glass-panel p-4 sm:p-6">
+              <div key={algo.name} className="glass-panel p-4 sm:p-6 transition-all duration-300 hover:border-primary/20">
                 <div className="flex flex-col md:flex-row md:items-center gap-3 sm:gap-4">
                   <div className="flex-1">
                     <h3 className="font-semibold text-base sm:text-lg mb-1">{algo.name}</h3>
@@ -236,7 +236,7 @@ export function About() {
             Data Sources
           </h2>
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="glass-panel p-4 sm:p-6">
+            <div className="glass-panel p-4 sm:p-6 transition-all duration-300 hover:border-primary/30 hover:-translate-y-1">
               <h3 className="font-semibold text-sm sm:text-base mb-2">Google Earth Engine</h3>
               <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                 Cloud-based geospatial analysis platform providing access to Sentinel-2 imagery 
@@ -253,7 +253,7 @@ export function About() {
                 </Button>
               </a>
             </div>
-            <div className="glass-panel p-4 sm:p-6">
+            <div className="glass-panel p-4 sm:p-6 transition-all duration-300 hover:border-primary/30 hover:-translate-y-1">
               <h3 className="font-semibold text-sm sm:text-base mb-2">NASA FIRMS</h3>
               <p className="text-xs sm:text-sm text-muted-foreground mb-4">
                 Fire Information for Resource Management System provides real-time active fire 
@@ -301,33 +301,33 @@ export function About() {
             Hazard Indicators
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4">
-            <div className="glass-panel p-3 sm:p-4 text-center">
+            <div className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-flood/50">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-flood mx-auto mb-2 flex items-center justify-center">
                 <Waves className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
               <h4 className="font-medium text-xs sm:text-sm">Flood Risk</h4>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Water detection zones</p>
             </div>
-            <div className="glass-panel p-3 sm:p-4 text-center">
+            <div className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-danger/50">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-fire mx-auto mb-2 flex items-center justify-center">
                 <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
               <h4 className="font-medium text-xs sm:text-sm">Fire Risk</h4>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Thermal anomalies</p>
             </div>
-            <div className="glass-panel p-3 sm:p-4 text-center">
+            <div className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-vegetation/50">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-vegetation mx-auto mb-2 flex items-center justify-center">
                 <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
               <h4 className="font-medium text-xs sm:text-sm">Vegetation</h4>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">NDVI health index</p>
             </div>
-            <div className="glass-panel p-3 sm:p-4 text-center">
+            <div className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-alert/50">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-alert mx-auto mb-2" />
               <h4 className="font-medium text-xs sm:text-sm">Warning</h4>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">Moderate risk</p>
             </div>
-            <div className="glass-panel p-3 sm:p-4 text-center">
+            <div className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-danger/50">
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-danger mx-auto mb-2" />
               <h4 className="font-medium text-xs sm:text-sm">Critical</h4>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">High priority</p>

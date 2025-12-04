@@ -310,7 +310,7 @@ export function Public() {
             {volunteerAnnouncements.map((announcement) => (
               <div
                 key={announcement.id}
-                className="p-3 sm:p-4 rounded-xl bg-primary/10 border border-primary/30"
+                className="p-3 sm:p-4 rounded-xl bg-primary/10 border border-primary/30 transition-all duration-300 hover:bg-primary/15 hover:border-primary/50"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
                   <div className="flex-1 min-w-0">
@@ -404,7 +404,7 @@ export function Public() {
                 <div
                   key={region.id}
                   className={cn(
-                    "glass-panel p-5 transition-all duration-300 hover:border-primary/30 cursor-pointer",
+                    "glass-panel p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 cursor-pointer",
                     selectedRegion === region.id && "ring-2 ring-primary"
                   )}
                   onClick={() => setSelectedRegion(region.id === selectedRegion ? null : region.id)}

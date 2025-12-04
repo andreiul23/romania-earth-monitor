@@ -119,16 +119,16 @@ export function Landing() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-2 sm:gap-4 pt-6 sm:pt-8 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-              {stats.map((stat, index) => (
-                <div
-                  key={stat.label}
-                  className="glass-panel p-3 sm:p-4 text-center"
-                  style={{ animationDelay: `${0.4 + index * 0.1}s` }}
-                >
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
-                  <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">{stat.label}</div>
-                </div>
-              ))}
+            {stats.map((stat, index) => (
+              <div
+                key={stat.label}
+                className="glass-panel p-3 sm:p-4 text-center transition-all duration-300 hover:scale-105 hover:border-primary/30"
+                style={{ animationDelay: `${0.4 + index * 0.1}s` }}
+              >
+                <div className="text-lg sm:text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">{stat.label}</div>
+              </div>
+            ))}
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export function Landing() {
               return (
                 <div
                   key={feature.title}
-                  className="glass-panel-elevated p-4 sm:p-6 group hover:border-primary/30 transition-all duration-300"
+                  className="glass-panel-elevated p-4 sm:p-6 group hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-300"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-secondary flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
@@ -199,7 +199,7 @@ export function Landing() {
                 {regions.map((region) => (
                   <div
                     key={region}
-                    className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary/50 border border-border"
+                    className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-secondary/50 border border-border transition-all duration-200 hover:bg-secondary hover:border-primary/30"
                   >
                     <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent" />
                     <span className="text-xs sm:text-sm truncate">{region}</span>
