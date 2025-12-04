@@ -10,6 +10,7 @@ import Public from "./pages/Public";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
+import VolunteerManagement from "./pages/VolunteerManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/volunteers"
+              element={
+                <ProtectedRoute>
+                  <VolunteerManagement />
                 </ProtectedRoute>
               }
             />

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, Trash2, RefreshCw, Megaphone, AlertCircle } from "lucide-react";
+import { Users, Trash2, RefreshCw, Megaphone, AlertCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AnnouncementCreationForm } from "./AnnouncementCreationForm";
@@ -110,18 +111,25 @@ export function VolunteerAnnouncementsPanel() {
     };
   }, []);
 
-  const handleDeactivate = async (id: string) => {
+  const handleDelete = async (id: string) => {
     try {
+      // First delete all signups for this announcement
+      await supabase
+        .from("volunteer_signups")
+        .delete()
+        .eq("announcement_id", id);
+
+      // Then delete the announcement
       const { error } = await supabase
         .from("volunteer_announcements")
-        .update({ is_active: false })
+        .delete()
         .eq("id", id);
 
       if (error) throw error;
-      toast.success("Announcement deactivated");
+      toast.success("Announcement deleted");
       fetchAnnouncements();
     } catch {
-      toast.error("Failed to deactivate announcement");
+      toast.error("Failed to delete announcement");
     }
   };
 
@@ -152,6 +160,17 @@ export function VolunteerAnnouncementsPanel() {
         </h3>
         <div className="flex items-center gap-2">
           <AnnouncementCreationForm onCreated={fetchAnnouncements} />
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="h-8"
+          >
+            <Link to="/volunteers">
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Manage
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -207,7 +226,7 @@ export function VolunteerAnnouncementsPanel() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDeactivate(announcement.id)}
+                    onClick={() => handleDelete(announcement.id)}
                     className="h-7 w-7 p-0 text-muted-foreground hover:text-danger hover:bg-danger/10"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
