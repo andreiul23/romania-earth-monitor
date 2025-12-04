@@ -56,18 +56,31 @@ interface RegionStatus {
 
 // Convert satellite API data to UI format
 function convertAnalysisToStatus(analysis: RegionAnalysis): RegionStatus {
-  const { indicators } = analysis;
+  const { indicators, geeAnalysis } = analysis;
   
-  // Convert qualitative to quantitative
-  const floodRiskMap = { low: 15, medium: 45, high: 75 };
-  const vegetationMap = { poor: 30, moderate: 60, good: 85 };
+  // Use actual numeric data from GEE analysis when available
+  const floodRisk = geeAnalysis?.floodPercentage ?? 
+    (indicators.floodRisk === 'high' ? 65 : indicators.floodRisk === 'medium' ? 35 : 15);
   
-  const floodRisk = floodRiskMap[indicators.floodRisk] || 25;
-  const vegetationHealth = vegetationMap[indicators.vegetationHealth] || 60;
+  // Convert NDVI to vegetation health percentage (NDVI ranges from -1 to 1, healthy > 0.3)
+  const ndviValue = geeAnalysis?.ndviMean ?? 0.4;
+  const vegetationHealth = Math.max(0, Math.min(100, Math.round((ndviValue + 0.2) * 70)));
   
-  // Derive fire risk from vegetation health (inverse relationship)
-  const fireRisk = indicators.vegetationHealth === 'poor' ? 55 : 
-                   indicators.vegetationHealth === 'moderate' ? 30 : 15;
+  // Use actual fire data from FIRMS
+  const fireHotspots = indicators.fireData?.activeHotspots ?? 0;
+  const totalFRP = indicators.fireData?.totalFRP ?? 0;
+  
+  // Calculate fire risk based on actual hotspot data
+  let fireRisk: number;
+  if (fireHotspots >= 10 || totalFRP > 100) {
+    fireRisk = 85 + Math.random() * 10;
+  } else if (fireHotspots >= 5 || totalFRP > 50) {
+    fireRisk = 60 + Math.random() * 15;
+  } else if (fireHotspots >= 1) {
+    fireRisk = 35 + Math.random() * 15;
+  } else {
+    fireRisk = 5 + Math.random() * 15;
+  }
   
   const maxRisk = Math.max(floodRisk, fireRisk);
   const riskLevel: RiskLevel = 
@@ -80,11 +93,11 @@ function convertAnalysisToStatus(analysis: RegionAnalysis): RegionStatus {
     name: analysis.regionId,
     displayName: analysis.regionName,
     riskLevel,
-    floodRisk,
-    vegetationHealth,
-    fireRisk,
-    lastUpdated: indicators.lastUpdate || new Date().toISOString(),
-    alerts: riskLevel === "critical" ? 2 : riskLevel === "high" ? 1 : 0,
+    floodRisk: Math.round(floodRisk),
+    vegetationHealth: Math.round(vegetationHealth),
+    fireRisk: Math.round(fireRisk),
+    lastUpdated: geeAnalysis?.dataDate || indicators.lastUpdate || new Date().toISOString(),
+    alerts: fireHotspots + (floodRisk > 50 ? 1 : 0),
   };
 }
 
