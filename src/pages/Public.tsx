@@ -52,16 +52,19 @@ interface RegionStatus {
   alerts: number;
 }
 
-// Generate mock status data
-const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region) => {
-  const floodRisk = Math.random() * 100;
-  const vegetationHealth = 30 + Math.random() * 60;
-  const fireRisk = Math.random() * 100;
+// Generate mock status data with more realistic values
+const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region, index) => {
+  // Use seeded random based on index for consistency
+  const seed = (index * 17 + 7) % 100;
+  const floodRisk = Math.max(5, Math.min(45, seed * 0.4 + (index % 3) * 8));
+  const vegetationHealth = 55 + (seed % 30);
+  const fireRisk = Math.max(3, Math.min(35, (seed + 20) % 40));
+  
   const maxRisk = Math.max(floodRisk, fireRisk);
   const riskLevel: RiskLevel = 
-    maxRisk > 70 ? "critical" : 
-    maxRisk > 50 ? "high" : 
-    maxRisk > 25 ? "medium" : "low";
+    maxRisk > 60 ? "critical" : 
+    maxRisk > 40 ? "high" : 
+    maxRisk > 20 ? "medium" : "low";
   
   return {
     id: region.id,
@@ -71,7 +74,7 @@ const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region) => {
     floodRisk: Math.round(floodRisk),
     vegetationHealth: Math.round(vegetationHealth),
     fireRisk: Math.round(fireRisk),
-    lastUpdated: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+    lastUpdated: new Date(Date.now() - (index * 600000)).toISOString(),
     alerts: riskLevel === "critical" ? 2 : riskLevel === "high" ? 1 : 0,
   };
 });
