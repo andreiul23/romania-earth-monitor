@@ -486,7 +486,7 @@ export function Public() {
 
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
                     <span className="text-xs text-muted-foreground">
-                      Updated {new Date(region.lastUpdated).toLocaleTimeString()}
+                      {lastCacheTime ? `Updated ${new Date(lastCacheTime).toLocaleTimeString()}` : "Loading..."}
                     </span>
                     {region.alerts > 0 && (
                       <Badge variant="destructive" className="text-xs">
