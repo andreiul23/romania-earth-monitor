@@ -221,28 +221,42 @@ function generateMockSummary(regionId: string): HazardSummary {
 
   // Generate realistic-ish random data
   const floodPercentage = Math.random() * 15;
+  const firePercentage = Math.random() * 12;
   const avgNdvi = 0.3 + Math.random() * 0.4;
-  const riskIndex = floodPercentage > 10 ? 3 : floodPercentage > 5 ? 2 : floodPercentage > 2 ? 1 : 0;
+  const maxRisk = Math.max(floodPercentage, firePercentage);
+  const riskIndex = maxRisk > 10 ? 3 : maxRisk > 5 ? 2 : maxRisk > 2 ? 1 : 0;
+
+  const alerts: HazardSummary['alerts'] = [];
+  
+  if (floodPercentage > 5) {
+    alerts.push({
+      id: `alert_flood_${Date.now()}`,
+      type: 'flood',
+      severity: floodPercentage > 10 ? 'danger' : 'warning',
+      message: `Elevated water levels detected in ${region?.displayName || regionId}`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+  
+  if (firePercentage > 5) {
+    alerts.push({
+      id: `alert_fire_${Date.now()}`,
+      type: 'fire_risk',
+      severity: firePercentage > 10 ? 'danger' : 'warning',
+      message: `Fire risk detected in ${region?.displayName || regionId}`,
+      timestamp: new Date().toISOString(),
+    });
+  }
 
   return {
     region_id: regionId,
     region_name: region?.displayName || regionId,
     flood_percentage: Number(floodPercentage.toFixed(2)),
+    fire_percentage: Number(firePercentage.toFixed(2)),
     avg_ndvi: Number(avgNdvi.toFixed(3)),
     risk_level: riskLevels[riskIndex],
     last_updated: new Date().toISOString(),
-    alerts:
-      floodPercentage > 5
-        ? [
-            {
-              id: `alert_${Date.now()}`,
-              type: 'flood',
-              severity: floodPercentage > 10 ? 'danger' : 'warning',
-              message: `Elevated water levels detected in ${region?.displayName || regionId}`,
-              timestamp: new Date().toISOString(),
-            },
-          ]
-        : [],
+    alerts,
   };
 }
 
