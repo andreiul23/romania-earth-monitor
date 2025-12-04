@@ -424,8 +424,9 @@ export function ControlPanel({
               </div>
             </div>
 
-            {/* Vegetation Stress Alert */}
-            {satelliteData.geeAnalysis?.vegetationStress === 'high' && (
+            {/* Vegetation Stress Alert - only show for vegetation/hybrid */}
+            {(hazardType === 'vegetation' || hazardType === 'hybrid') && 
+             satelliteData.geeAnalysis?.vegetationStress === 'high' && (
               <div className="p-3 rounded-lg border bg-alert/10 border-alert/30 text-alert text-sm">
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" />
@@ -437,8 +438,8 @@ export function ControlPanel({
               </div>
             )}
 
-            {/* Fire Alert */}
-            {satelliteData.fireHotspots.length > 0 && (
+            {/* Fire Alert - Active fires detected */}
+            {(hazardType === 'fire' || hazardType === 'hybrid') && satelliteData.fireHotspots.length > 0 && (
               <div className="p-3 rounded-lg border bg-danger/10 border-danger/30 text-danger text-sm">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4" />
@@ -446,6 +447,19 @@ export function ControlPanel({
                 </div>
                 <p className="text-xs mt-1 opacity-80">
                   {satelliteData.fireHotspots.length} hotspot(s) detected via NASA FIRMS
+                </p>
+              </div>
+            )}
+
+            {/* No Fires Alert - show for fire analysis when no fires */}
+            {(hazardType === 'fire') && satelliteData.fireHotspots.length === 0 && (
+              <div className="p-3 rounded-lg border bg-accent/10 border-accent/30 text-accent text-sm">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-4 h-4" />
+                  <span className="font-medium">No Active Fires Detected</span>
+                </div>
+                <p className="text-xs mt-1 opacity-80">
+                  No fire hotspots found in this region via NASA FIRMS (last 3 days)
                 </p>
               </div>
             )}
