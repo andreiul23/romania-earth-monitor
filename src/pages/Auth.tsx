@@ -5,7 +5,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SafeRoLogo } from "@/components/icons/SafeRoLogo";
+import saferoLogo from "@/assets/safero-logo.png";
 import { toast } from "sonner";
 import { Shield, Mail, Lock, User, Building, Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -107,7 +107,7 @@ export function Auth() {
           <div className="glass-panel-elevated p-8">
             {/* Header */}
             <div className="text-center mb-8">
-              <SafeRoLogo size="lg" className="mx-auto mb-4" />
+              <img src={saferoLogo} alt="safeRo Logo" className="w-24 h-24 mx-auto mb-4 object-contain" />
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Shield className="w-5 h-5 text-primary" />
                 <span className="text-sm font-medium text-primary">Institutional Access</span>

@@ -1,5 +1,5 @@
 import { Layout } from "@/components/layout/Layout";
-import { SafeRoLogo } from "@/components/icons/SafeRoLogo";
+import saferoLogo from "@/assets/safero-logo.png";
 import { 
   Satellite, 
   Radio, 
@@ -9,7 +9,8 @@ import {
   Database, 
   Cpu,
   ExternalLink,
-  Github
+  Github,
+  Flame
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -92,7 +93,7 @@ export function About() {
       <div className="container mx-auto px-4 py-12 max-w-5xl">
         {/* Header */}
         <div className="text-center mb-16">
-          <SafeRoLogo size="xl" className="mx-auto mb-6" />
+          <img src={saferoLogo} alt="safeRo Logo" className="w-32 h-32 mx-auto mb-6 object-contain" />
           <h1 className="text-4xl md:text-5xl font-bold mb-4">About SAFE-RO</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             A dual-interface software platform designed to monitor natural hazards in Romania 
@@ -293,14 +294,25 @@ export function About() {
             <Waves className="w-6 h-6 text-primary" />
             Hazard Indicators
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-flood mx-auto mb-2" />
+              <div className="w-8 h-8 rounded-lg bg-flood mx-auto mb-2 flex items-center justify-center">
+                <Waves className="w-4 h-4 text-white" />
+              </div>
               <h4 className="font-medium text-sm">Flood Risk</h4>
               <p className="text-xs text-muted-foreground">Water detection zones</p>
             </div>
             <div className="glass-panel p-4 text-center">
-              <div className="w-8 h-8 rounded-lg bg-vegetation mx-auto mb-2" />
+              <div className="w-8 h-8 rounded-lg bg-fire mx-auto mb-2 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-white" />
+              </div>
+              <h4 className="font-medium text-sm">Fire Risk</h4>
+              <p className="text-xs text-muted-foreground">Thermal anomalies</p>
+            </div>
+            <div className="glass-panel p-4 text-center">
+              <div className="w-8 h-8 rounded-lg bg-vegetation mx-auto mb-2 flex items-center justify-center">
+                <Leaf className="w-4 h-4 text-white" />
+              </div>
               <h4 className="font-medium text-sm">Vegetation</h4>
               <p className="text-xs text-muted-foreground">NDVI health index</p>
             </div>

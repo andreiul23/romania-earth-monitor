@@ -232,15 +232,15 @@ export function Landing() {
         <div className="container mx-auto px-4">
           <div className="glass-panel-elevated p-8 md:p-12 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
-            <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
+            <div className="relative z-10 space-y-8 max-w-2xl mx-auto">
               <div className="flex items-center justify-center gap-2">
                 <Clock className="w-5 h-5 text-accent" />
                 <span className="text-sm font-medium text-accent">Real-Time Monitoring</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold">
+              <h2 className="text-3xl md:text-4xl font-bold leading-relaxed">
                 Ready to Monitor Hazards?
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-lg leading-relaxed">
                 Access the dashboard to start monitoring satellite imagery, analyze vegetation health, 
                 and detect flood risks across Romanian regions.
               </p>

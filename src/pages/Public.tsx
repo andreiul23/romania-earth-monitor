@@ -88,7 +88,8 @@ export function Public() {
         .from("volunteer_announcements")
         .select("*")
         .eq("is_active", true)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(3);
       
       if (data) {
         setVolunteerAnnouncements(data as VolunteerAnnouncement[]);
