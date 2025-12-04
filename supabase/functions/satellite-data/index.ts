@@ -33,6 +33,104 @@ interface ProductMetadata {
   processingLevel: string;
 }
 
+// NASA FIRMS fire hotspot data interface
+interface FireHotspot {
+  latitude: number;
+  longitude: number;
+  brightness: number;
+  confidence: string | number;
+  acq_date: string;
+  acq_time: string;
+  satellite: string;
+  frp: number; // Fire Radiative Power
+}
+
+// Fetch fire hotspots from NASA FIRMS API
+async function getFireHotspots(bbox: number[], daysBack: number = 3): Promise<FireHotspot[]> {
+  const firmsApiKey = Deno.env.get('NASA_FIRMS_API_KEY');
+  
+  // Use VIIRS data source (most accurate for fire detection)
+  const source = 'VIIRS_SNPP_NRT';
+  const [minLon, minLat, maxLon, maxLat] = bbox;
+  
+  // Expand bbox slightly for better coverage
+  const expandedBbox = `${minLon - 0.5},${minLat - 0.5},${maxLon + 0.5},${maxLat + 0.5}`;
+  
+  let url: string;
+  if (firmsApiKey) {
+    // Use authenticated API for better rate limits
+    url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${firmsApiKey}/${source}/${expandedBbox}/${daysBack}`;
+  } else {
+    // Use open data endpoint (Romania country code: ROU)
+    // This gets all fires in Romania, we'll filter by bbox
+    url = `https://firms.modaps.eosdis.nasa.gov/api/country/csv/OPEN_DATA/${source}/ROU/${daysBack}`;
+  }
+
+  console.log(`[satellite-data] Fetching FIRMS data: ${firmsApiKey ? 'authenticated' : 'open'}`);
+
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      console.error(`[satellite-data] FIRMS API error: ${response.status}`);
+      return [];
+    }
+
+    const csvText = await response.text();
+    const lines = csvText.trim().split('\n');
+    
+    if (lines.length < 2) {
+      console.log('[satellite-data] No fire data returned from FIRMS');
+      return [];
+    }
+
+    // Parse CSV header
+    const headers = lines[0].split(',');
+    const latIdx = headers.indexOf('latitude');
+    const lonIdx = headers.indexOf('longitude');
+    const brightIdx = headers.indexOf('bright_ti4') !== -1 ? headers.indexOf('bright_ti4') : headers.indexOf('brightness');
+    const confIdx = headers.indexOf('confidence');
+    const dateIdx = headers.indexOf('acq_date');
+    const timeIdx = headers.indexOf('acq_time');
+    const satIdx = headers.indexOf('satellite');
+    const frpIdx = headers.indexOf('frp');
+
+    const hotspots: FireHotspot[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',');
+      
+      const lat = parseFloat(values[latIdx]);
+      const lon = parseFloat(values[lonIdx]);
+      
+      // Filter by bbox if using country-wide data
+      if (!firmsApiKey) {
+        if (lon < minLon - 0.5 || lon > maxLon + 0.5 || lat < minLat - 0.5 || lat > maxLat + 0.5) {
+          continue;
+        }
+      }
+      
+      hotspots.push({
+        latitude: lat,
+        longitude: lon,
+        brightness: parseFloat(values[brightIdx]) || 0,
+        confidence: values[confIdx] || 'unknown',
+        acq_date: values[dateIdx] || '',
+        acq_time: values[timeIdx] || '',
+        satellite: values[satIdx] || 'VIIRS',
+        frp: parseFloat(values[frpIdx]) || 0,
+      });
+    }
+
+    console.log(`[satellite-data] Found ${hotspots.length} fire hotspots for region`);
+    return hotspots;
+    
+  } catch (error) {
+    console.error('[satellite-data] Error fetching FIRMS data:', error);
+    return [];
+  }
+}
+
 // Get OAuth2 token from Copernicus Data Space
 async function getAccessToken(): Promise<string> {
   const clientId = Deno.env.get('COPERNICUS_CLIENT_ID');
@@ -142,17 +240,71 @@ async function searchProducts(
   });
 }
 
+// Calculate fire risk based on FIRMS hotspots
+function calculateFireRisk(hotspots: FireHotspot[]): {
+  fireRisk: 'low' | 'medium' | 'high' | 'critical';
+  activeHotspots: number;
+  highConfidenceCount: number;
+  maxBrightness: number;
+  totalFRP: number;
+} {
+  if (hotspots.length === 0) {
+    return {
+      fireRisk: 'low',
+      activeHotspots: 0,
+      highConfidenceCount: 0,
+      maxBrightness: 0,
+      totalFRP: 0,
+    };
+  }
+
+  const highConfidence = hotspots.filter(h => 
+    h.confidence === 'high' || h.confidence === 'h' || 
+    (typeof h.confidence === 'number' && h.confidence >= 80)
+  );
+  
+  const maxBrightness = Math.max(...hotspots.map(h => h.brightness));
+  const totalFRP = hotspots.reduce((sum, h) => sum + (h.frp || 0), 0);
+  
+  // Determine fire risk level
+  let fireRisk: 'low' | 'medium' | 'high' | 'critical' = 'low';
+  
+  if (hotspots.length >= 10 || highConfidence.length >= 5 || totalFRP > 100) {
+    fireRisk = 'critical';
+  } else if (hotspots.length >= 5 || highConfidence.length >= 2 || totalFRP > 50) {
+    fireRisk = 'high';
+  } else if (hotspots.length >= 1) {
+    fireRisk = 'medium';
+  }
+
+  return {
+    fireRisk,
+    activeHotspots: hotspots.length,
+    highConfidenceCount: highConfidence.length,
+    maxBrightness,
+    totalFRP,
+  };
+}
+
 // Calculate simple hazard indicators based on available data
 function calculateHazardIndicators(
   sentinel2Products: ProductMetadata[],
-  sentinel1Products: ProductMetadata[]
+  sentinel1Products: ProductMetadata[],
+  fireHotspots: FireHotspot[] = []
 ): {
   floodRisk: 'low' | 'medium' | 'high';
   vegetationHealth: 'poor' | 'moderate' | 'good';
+  fireRisk: 'low' | 'medium' | 'high' | 'critical';
   dataAvailability: 'limited' | 'moderate' | 'good';
   lastUpdate: string | null;
   radarCoverage: boolean;
   opticalCoverage: boolean;
+  fireData: {
+    activeHotspots: number;
+    highConfidenceCount: number;
+    maxBrightness: number;
+    totalFRP: number;
+  };
 } {
   const hasOptical = sentinel2Products.length > 0;
   const hasRadar = sentinel1Products.length > 0;
@@ -171,7 +323,6 @@ function calculateHazardIndicators(
     : 100;
 
   // Estimate vegetation health based on cloud cover and data freshness
-  // (In a real implementation, this would use actual NDVI calculations)
   let vegetationHealth: 'poor' | 'moderate' | 'good' = 'moderate';
   if (avgCloudCover < 20 && hasOptical) {
     vegetationHealth = 'good';
@@ -180,27 +331,37 @@ function calculateHazardIndicators(
   }
 
   // Estimate flood risk based on radar availability
-  // (In a real implementation, this would use SAR intensity thresholding)
   let floodRisk: 'low' | 'medium' | 'high' = 'medium';
   if (hasRadar && sentinel1Products.length >= 3) {
-    floodRisk = 'low'; // Good radar coverage allows monitoring
+    floodRisk = 'low';
   } else if (!hasRadar) {
-    floodRisk = 'high'; // Can't monitor without radar
+    floodRisk = 'high';
   }
+
+  // Calculate fire risk from FIRMS data
+  const fireAnalysis = calculateFireRisk(fireHotspots);
 
   // Get the most recent acquisition date
   const allDates = [
     ...sentinel2Products.map(p => p.acquisitionDate),
     ...sentinel1Products.map(p => p.acquisitionDate),
+    ...fireHotspots.map(h => h.acq_date),
   ].filter(Boolean).sort().reverse();
 
   return {
     floodRisk,
     vegetationHealth,
+    fireRisk: fireAnalysis.fireRisk,
     dataAvailability,
     lastUpdate: allDates[0] || null,
     radarCoverage: hasRadar,
     opticalCoverage: hasOptical,
+    fireData: {
+      activeHotspots: fireAnalysis.activeHotspots,
+      highConfidenceCount: fireAnalysis.highConfidenceCount,
+      maxBrightness: fireAnalysis.maxBrightness,
+      totalFRP: fireAnalysis.totalFRP,
+    },
   };
 }
 
@@ -258,16 +419,24 @@ serve(async (req) => {
         });
       }
 
+      const region = REGIONS[regionId];
+      if (!region) {
+        return new Response(JSON.stringify({ error: 'Unknown region' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const accessToken = await getAccessToken();
       
-      // Search for both Sentinel-1 and Sentinel-2 products in parallel
-      const [sentinel2Products, sentinel1Products] = await Promise.all([
+      // Search for Sentinel data and fire hotspots in parallel
+      const [sentinel2Products, sentinel1Products, fireHotspots] = await Promise.all([
         searchProducts(accessToken, regionId, 'sentinel-2', maxCloudCover || 30, daysBack || 30),
         searchProducts(accessToken, regionId, 'sentinel-1', 100, daysBack || 30),
+        getFireHotspots(region.bbox, Math.min(daysBack || 3, 10)), // FIRMS allows max 10 days
       ]);
 
-      const indicators = calculateHazardIndicators(sentinel2Products, sentinel1Products);
-      const region = REGIONS[regionId];
+      const indicators = calculateHazardIndicators(sentinel2Products, sentinel1Products, fireHotspots);
 
       return new Response(JSON.stringify({
         regionId,
@@ -276,6 +445,42 @@ serve(async (req) => {
         indicators,
         sentinel2Products: sentinel2Products.slice(0, 5),
         sentinel1Products: sentinel1Products.slice(0, 5),
+        fireHotspots: fireHotspots.slice(0, 20), // Limit to 20 hotspots in response
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Action: fires - Get fire hotspots for a region
+    if (action === 'fires') {
+      if (!regionId) {
+        return new Response(JSON.stringify({ error: 'regionId is required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const region = REGIONS[regionId];
+      if (!region) {
+        return new Response(JSON.stringify({ error: 'Unknown region' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const fireHotspots = await getFireHotspots(region.bbox, Math.min(daysBack || 3, 10));
+      const fireAnalysis = calculateFireRisk(fireHotspots);
+
+      return new Response(JSON.stringify({
+        regionId,
+        regionName: region.name,
+        bbox: region.bbox,
+        fireRisk: fireAnalysis.fireRisk,
+        activeHotspots: fireAnalysis.activeHotspots,
+        highConfidenceCount: fireAnalysis.highConfidenceCount,
+        maxBrightness: fireAnalysis.maxBrightness,
+        totalFRP: fireAnalysis.totalFRP,
+        hotspots: fireHotspots,
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });

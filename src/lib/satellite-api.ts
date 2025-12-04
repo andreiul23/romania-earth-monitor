@@ -16,13 +16,33 @@ export interface ProductMetadata {
   processingLevel: string;
 }
 
+export interface FireHotspot {
+  latitude: number;
+  longitude: number;
+  brightness: number;
+  confidence: string | number;
+  acq_date: string;
+  acq_time: string;
+  satellite: string;
+  frp: number;
+}
+
+export interface FireData {
+  activeHotspots: number;
+  highConfidenceCount: number;
+  maxBrightness: number;
+  totalFRP: number;
+}
+
 export interface HazardIndicators {
   floodRisk: 'low' | 'medium' | 'high';
   vegetationHealth: 'poor' | 'moderate' | 'good';
+  fireRisk: 'low' | 'medium' | 'high' | 'critical';
   dataAvailability: 'limited' | 'moderate' | 'good';
   lastUpdate: string | null;
   radarCoverage: boolean;
   opticalCoverage: boolean;
+  fireData: FireData;
 }
 
 export interface RegionAnalysis {
@@ -32,6 +52,19 @@ export interface RegionAnalysis {
   indicators: HazardIndicators;
   sentinel2Products: ProductMetadata[];
   sentinel1Products: ProductMetadata[];
+  fireHotspots: FireHotspot[];
+}
+
+export interface FireAnalysis {
+  regionId: string;
+  regionName: string;
+  bbox: number[];
+  fireRisk: 'low' | 'medium' | 'high' | 'critical';
+  activeHotspots: number;
+  highConfidenceCount: number;
+  maxBrightness: number;
+  totalFRP: number;
+  hotspots: FireHotspot[];
 }
 
 // List available Romanian regions
@@ -114,4 +147,25 @@ export async function analyzeAllRegions(
   );
 
   return analyses.filter((a): a is RegionAnalysis => a !== null);
+}
+
+// Get fire hotspots for a specific region
+export async function getFireData(
+  regionId: string,
+  daysBack: number = 3
+): Promise<FireAnalysis> {
+  const { data, error } = await supabase.functions.invoke('satellite-data', {
+    body: { 
+      action: 'fires',
+      regionId,
+      daysBack,
+    },
+  });
+
+  if (error) {
+    console.error('[satellite-api] getFireData error:', error);
+    throw new Error(error.message || 'Failed to get fire data');
+  }
+
+  return data;
 }
