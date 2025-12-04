@@ -330,7 +330,7 @@ export function ControlPanel({
               </div>
               
               {/* GEE NDVI - show for vegetation and hybrid */}
-              {satelliteData.geeAnalysis?.ndviMean !== null && (hazardType === "vegetation" || hazardType === "hybrid") && (
+              {satelliteData.geeAnalysis && satelliteData.geeAnalysis.ndviMean !== null && (hazardType === "vegetation" || hazardType === "hybrid") && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -348,14 +348,14 @@ export function ControlPanel({
                     />
                   </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Min: {satelliteData.geeAnalysis.ndviMin?.toFixed(2)}</span>
-                    <span>Max: {satelliteData.geeAnalysis.ndviMax?.toFixed(2)}</span>
+                    <span>Min: {satelliteData.geeAnalysis.ndviMin?.toFixed(2) ?? 'N/A'}</span>
+                    <span>Max: {satelliteData.geeAnalysis.ndviMax?.toFixed(2) ?? 'N/A'}</span>
                   </div>
                 </div>
               )}
 
               {/* GEE Flood Percentage - show for flood and hybrid */}
-              {satelliteData.geeAnalysis?.floodPercentage !== null && (hazardType === "flood" || hazardType === "hybrid") && (
+              {satelliteData.geeAnalysis && satelliteData.geeAnalysis.floodPercentage !== null && (hazardType === "flood" || hazardType === "hybrid") && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
