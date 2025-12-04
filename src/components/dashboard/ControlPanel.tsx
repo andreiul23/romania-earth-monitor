@@ -296,6 +296,21 @@ export function ControlPanel({
                 </div>
               )}
               
+              {summary.fire_percentage !== undefined && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Fire Risk</span>
+                    <span className="text-sm font-mono text-danger">{summary.fire_percentage}%</span>
+                  </div>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-danger rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(summary.fire_percentage * 5, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
               {summary.avg_ndvi !== undefined && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">

@@ -55,6 +55,7 @@ export interface HazardSummary {
   region_id: string;
   region_name: string;
   flood_percentage?: number;
+  fire_percentage?: number;
   avg_ndvi?: number;
   risk_level: 'low' | 'medium' | 'high' | 'critical';
   last_updated: string;
