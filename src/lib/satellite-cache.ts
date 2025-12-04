@@ -2,6 +2,7 @@ import { analyzeAllRegions, type RegionAnalysis } from "./satellite-api";
 
 const CACHE_KEY = "safero_satellite_data";
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+const FETCH_TIMEOUT_MS = 60 * 1000; // 60 second timeout for API calls
 
 interface CachedData {
   data: RegionAnalysis[];
@@ -36,6 +37,16 @@ function setCache(data: RegionAnalysis[]): void {
   localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
 }
 
+// Wrapper to add timeout to promises
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`Request timed out after ${timeoutMs}ms`)), timeoutMs)
+    ),
+  ]);
+}
+
 export async function getCachedSatelliteData(
   forceRefresh = false,
   maxCloudCover = 50,
@@ -48,8 +59,13 @@ export async function getCachedSatelliteData(
     }
   }
 
-  const data = await analyzeAllRegions(maxCloudCover, daysBack);
-  setCache(data);
+  console.log("[satellite-cache] Fetching fresh satellite data...");
+  const data = await withTimeout(analyzeAllRegions(maxCloudCover, daysBack), FETCH_TIMEOUT_MS);
+  console.log("[satellite-cache] Received", data.length, "region analyses");
+  
+  if (data.length > 0) {
+    setCache(data);
+  }
   
   return { data, fromCache: false, cacheTime: Date.now() };
 }
