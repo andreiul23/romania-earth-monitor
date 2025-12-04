@@ -3,7 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { SafeRoLogo } from "@/components/icons/SafeRoLogo";
 import { 
-  Satellite, 
+  Flame, 
   Shield, 
   Waves, 
   Leaf, 
@@ -16,10 +16,10 @@ import {
 
 const features = [
   {
-    icon: Satellite,
-    title: "Dual-Satellite Integration",
-    description: "Combines Sentinel-1 (Radar) and Sentinel-2 (Optical) data for comprehensive monitoring regardless of weather conditions.",
-    color: "text-primary",
+    icon: Flame,
+    title: "Fire Detection",
+    description: "Thermal anomaly detection identifies active wildfires and burn scars using multi-spectral satellite imagery.",
+    color: "text-fire",
   },
   {
     icon: Waves,
