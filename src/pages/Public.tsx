@@ -3,10 +3,10 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_REGIONS } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import { analyzeAllRegions, type RegionAnalysis } from "@/lib/satellite-api";
 
 const emailSchema = z.string()
   .trim()
@@ -28,7 +28,8 @@ import {
   Flame,
   Users,
   UserPlus,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { VolunteerAnnouncement } from "@/types";
@@ -52,13 +53,20 @@ interface RegionStatus {
   alerts: number;
 }
 
-// Generate mock status data with more realistic values
-const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region, index) => {
-  // Use seeded random based on index for consistency
-  const seed = (index * 17 + 7) % 100;
-  const floodRisk = Math.max(5, Math.min(45, seed * 0.4 + (index % 3) * 8));
-  const vegetationHealth = 55 + (seed % 30);
-  const fireRisk = Math.max(3, Math.min(35, (seed + 20) % 40));
+// Convert satellite API data to UI format
+function convertAnalysisToStatus(analysis: RegionAnalysis): RegionStatus {
+  const { indicators } = analysis;
+  
+  // Convert qualitative to quantitative
+  const floodRiskMap = { low: 15, medium: 45, high: 75 };
+  const vegetationMap = { poor: 30, moderate: 60, good: 85 };
+  
+  const floodRisk = floodRiskMap[indicators.floodRisk] || 25;
+  const vegetationHealth = vegetationMap[indicators.vegetationHealth] || 60;
+  
+  // Derive fire risk from vegetation health (inverse relationship)
+  const fireRisk = indicators.vegetationHealth === 'poor' ? 55 : 
+                   indicators.vegetationHealth === 'moderate' ? 30 : 15;
   
   const maxRisk = Math.max(floodRisk, fireRisk);
   const riskLevel: RiskLevel = 
@@ -67,17 +75,17 @@ const regionStatuses: RegionStatus[] = MOCK_REGIONS.map((region, index) => {
     maxRisk > 20 ? "medium" : "low";
   
   return {
-    id: region.id,
-    name: region.name,
-    displayName: region.displayName,
+    id: analysis.regionId,
+    name: analysis.regionId,
+    displayName: analysis.regionName,
     riskLevel,
-    floodRisk: Math.round(floodRisk),
-    vegetationHealth: Math.round(vegetationHealth),
-    fireRisk: Math.round(fireRisk),
-    lastUpdated: new Date(Date.now() - (index * 600000)).toISOString(),
+    floodRisk,
+    vegetationHealth,
+    fireRisk,
+    lastUpdated: indicators.lastUpdate || new Date().toISOString(),
     alerts: riskLevel === "critical" ? 2 : riskLevel === "high" ? 1 : 0,
   };
-});
+}
 
 const riskConfig: Record<RiskLevel, { color: string; bg: string; icon: typeof CheckCircle2; label: string }> = {
   low: { color: "text-vegetation", bg: "bg-vegetation/10", icon: CheckCircle2, label: "Low Risk" },
@@ -94,6 +102,28 @@ export function Public() {
   const [volunteerAnnouncements, setVolunteerAnnouncements] = useState<AnnouncementWithSignup[]>([]);
   const [volunteerEmails, setVolunteerEmails] = useState<Record<string, string>>({});
   const [signingUpFor, setSigningUpFor] = useState<string | null>(null);
+  const [regionStatuses, setRegionStatuses] = useState<RegionStatus[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  // Fetch satellite data
+  useEffect(() => {
+    const fetchSatelliteData = async () => {
+      setIsLoadingData(true);
+      setDataError(null);
+      try {
+        const analyses = await analyzeAllRegions(50, 14);
+        const statuses = analyses.map(convertAnalysisToStatus);
+        setRegionStatuses(statuses);
+      } catch (error) {
+        console.error("Failed to fetch satellite data:", error);
+        setDataError("Unable to load satellite data. Please try again.");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+    fetchSatelliteData();
+  }, []);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -114,6 +144,22 @@ export function Public() {
   const filteredRegions = regionStatuses.filter((region) =>
     region.displayName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleRefreshData = async () => {
+    setIsLoadingData(true);
+    setDataError(null);
+    try {
+      const analyses = await analyzeAllRegions(50, 14);
+      const statuses = analyses.map(convertAnalysisToStatus);
+      setRegionStatuses(statuses);
+      toast.success("Data refreshed successfully");
+    } catch (error) {
+      console.error("Failed to refresh satellite data:", error);
+      setDataError("Unable to refresh data. Please try again.");
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
 
   const handleSubscribe = async () => {
     if (!selectedRegion) {
@@ -201,6 +247,16 @@ export function Public() {
             Real-time satellite monitoring of natural hazards across Romanian regions. 
             Check your area's status and subscribe to alerts.
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefreshData}
+            disabled={isLoadingData}
+            className="mt-4"
+          >
+            <RefreshCw className={cn("w-4 h-4 mr-2", isLoadingData && "animate-spin")} />
+            {isLoadingData ? "Loading..." : "Refresh Data"}
+          </Button>
         </div>
 
         {/* Active Alerts Banner */}
@@ -294,109 +350,129 @@ export function Public() {
         </div>
 
         {/* Region Status Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
-          {filteredRegions.map((region) => {
-            const config = riskConfig[region.riskLevel];
-            const Icon = config.icon;
-            
-            return (
-              <div
-                key={region.id}
-                className={cn(
-                  "glass-panel p-5 transition-all duration-300 hover:border-primary/30 cursor-pointer",
-                  selectedRegion === region.id && "ring-2 ring-primary"
-                )}
-                onClick={() => setSelectedRegion(region.id === selectedRegion ? null : region.id)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" />
-                    <h3 className="font-semibold">{region.displayName}</h3>
-                  </div>
-                  <Badge className={cn("text-xs", config.bg, config.color)}>
-                    <Icon className="w-3 h-3 mr-1" />
-                    {config.label}
-                  </Badge>
-                </div>
-
-                <div className="space-y-3">
-                  {/* Flood Risk */}
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Waves className="w-3 h-3" /> Flood Risk
-                      </span>
-                      <span className={region.floodRisk > 50 ? "text-danger" : "text-foreground"}>
-                        {region.floodRisk}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          region.floodRisk > 70 ? "bg-danger" :
-                          region.floodRisk > 50 ? "bg-alert" :
-                          region.floodRisk > 25 ? "bg-primary" : "bg-vegetation"
-                        )}
-                        style={{ width: `${region.floodRisk}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Fire Risk */}
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Flame className="w-3 h-3" /> Fire Risk
-                      </span>
-                      <span className={region.fireRisk > 50 ? "text-danger" : "text-foreground"}>
-                        {region.fireRisk}%
-                      </span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          region.fireRisk > 70 ? "bg-danger" :
-                          region.fireRisk > 50 ? "bg-alert" :
-                          region.fireRisk > 25 ? "bg-primary" : "bg-vegetation"
-                        )}
-                        style={{ width: `${region.fireRisk}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Vegetation Health */}
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-muted-foreground flex items-center gap-1">
-                        <Leaf className="w-3 h-3" /> Vegetation
-                      </span>
-                      <span className="text-vegetation">{region.vegetationHealth}%</span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-vegetation rounded-full transition-all"
-                        style={{ width: `${region.vegetationHealth}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                  <span className="text-xs text-muted-foreground">
-                    Updated {new Date(region.lastUpdated).toLocaleTimeString()}
-                  </span>
-                  {region.alerts > 0 && (
-                    <Badge variant="destructive" className="text-xs">
-                      {region.alerts} alert{region.alerts > 1 ? "s" : ""}
-                    </Badge>
+        {dataError && (
+          <div className="mb-8 p-4 rounded-xl bg-danger/10 border border-danger/30 text-center">
+            <p className="text-danger">{dataError}</p>
+            <Button variant="outline" size="sm" onClick={handleRefreshData} className="mt-2">
+              Try Again
+            </Button>
+          </div>
+        )}
+        
+        {isLoadingData && regionStatuses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading satellite data...</p>
+          </div>
+        ) : filteredRegions.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">No regions found matching your search.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
+            {filteredRegions.map((region) => {
+              const config = riskConfig[region.riskLevel];
+              const Icon = config.icon;
+              
+              return (
+                <div
+                  key={region.id}
+                  className={cn(
+                    "glass-panel p-5 transition-all duration-300 hover:border-primary/30 cursor-pointer",
+                    selectedRegion === region.id && "ring-2 ring-primary"
                   )}
+                  onClick={() => setSelectedRegion(region.id === selectedRegion ? null : region.id)}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary" />
+                      <h3 className="font-semibold">{region.displayName}</h3>
+                    </div>
+                    <Badge className={cn("text-xs", config.bg, config.color)}>
+                      <Icon className="w-3 h-3 mr-1" />
+                      {config.label}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-3">
+                    {/* Flood Risk */}
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Waves className="w-3 h-3" /> Flood Risk
+                        </span>
+                        <span className={region.floodRisk > 50 ? "text-danger" : "text-foreground"}>
+                          {region.floodRisk}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            region.floodRisk > 70 ? "bg-danger" :
+                            region.floodRisk > 50 ? "bg-alert" :
+                            region.floodRisk > 25 ? "bg-primary" : "bg-vegetation"
+                          )}
+                          style={{ width: `${region.floodRisk}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Fire Risk */}
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Flame className="w-3 h-3" /> Fire Risk
+                        </span>
+                        <span className={region.fireRisk > 50 ? "text-danger" : "text-foreground"}>
+                          {region.fireRisk}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all",
+                            region.fireRisk > 70 ? "bg-danger" :
+                            region.fireRisk > 50 ? "bg-alert" :
+                            region.fireRisk > 25 ? "bg-primary" : "bg-vegetation"
+                          )}
+                          style={{ width: `${region.fireRisk}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Vegetation Health */}
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="text-muted-foreground flex items-center gap-1">
+                          <Leaf className="w-3 h-3" /> Vegetation
+                        </span>
+                        <span className="text-vegetation">{region.vegetationHealth}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-vegetation rounded-full transition-all"
+                          style={{ width: `${region.vegetationHealth}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+                    <span className="text-xs text-muted-foreground">
+                      Updated {new Date(region.lastUpdated).toLocaleTimeString()}
+                    </span>
+                    {region.alerts > 0 && (
+                      <Badge variant="destructive" className="text-xs">
+                        {region.alerts} alert{region.alerts > 1 ? "s" : ""}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Subscribe Section */}
         <div className="glass-panel-elevated p-5 sm:p-8 text-center">
