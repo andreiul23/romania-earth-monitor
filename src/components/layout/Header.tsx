@@ -18,12 +18,13 @@ import { useState } from "react";
 
 const publicNavItems = [
   { path: "/", label: "Home", icon: Satellite },
-  { path: "/public", label: "Public Status", icon: Users },
+  { path: "/public", label: "Status", icon: Users },
   { path: "/about", label: "About", icon: Info },
 ];
 
 const institutionalNavItems = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/volunteers", label: "Volunteers", icon: Users },
 ];
 
 export function Header() {

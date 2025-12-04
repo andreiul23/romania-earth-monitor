@@ -186,15 +186,15 @@ export function Public() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="w-6 h-6 text-primary" />
-            <span className="text-sm font-medium text-primary">Public Hazard Monitor</span>
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+            <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <span className="text-xs sm:text-sm font-medium text-primary">Public Hazard Monitor</span>
           </div>
-          <h1 className="text-4xl font-bold mb-4">Romania Hazard Status</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4">Romania Hazard Status</h1>
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">
             Real-time satellite monitoring of natural hazards across Romanian regions. 
             Check your area's status and subscribe to alerts.
           </p>
@@ -217,50 +217,57 @@ export function Public() {
 
         {/* Volunteer Announcements */}
         {volunteerAnnouncements.length > 0 && (
-          <div className="mb-8 space-y-3">
+          <div className="mb-6 sm:mb-8 space-y-3">
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-primary" />
-              <h2 className="font-semibold">Volunteer Requests</h2>
+              <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <h2 className="font-semibold text-sm sm:text-base">Volunteer Requests</h2>
             </div>
             {volunteerAnnouncements.map((announcement) => (
               <div
                 key={announcement.id}
-                className="p-4 rounded-xl bg-primary/10 border border-primary/30"
+                className="p-3 sm:p-4 rounded-xl bg-primary/10 border border-primary/30"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="font-medium text-primary">{announcement.region_name}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{announcement.message}</p>
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-primary text-sm sm:text-base">{announcement.region_name}</p>
+                      <Badge className="bg-primary/20 text-primary text-xs">
+                        {announcement.hazard_type}
+                      </Badge>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">{announcement.message}</p>
                     <p className="text-xs text-muted-foreground mt-2">
                       Posted: {new Date(announcement.created_at).toLocaleString()}
                     </p>
                   </div>
-                  <Badge className="bg-primary/20 text-primary">
-                    {announcement.hazard_type}
-                  </Badge>
                 </div>
                 
                 {/* Volunteer Signup */}
-                <div className="flex items-center gap-2 pt-3 border-t border-primary/20">
-                  <UserPlus className="w-4 h-4 text-primary flex-shrink-0" />
-                  <Input
-                    type="email"
-                    placeholder="Your email to volunteer"
-                    value={volunteerEmails[announcement.id] || ""}
-                    onChange={(e) => setVolunteerEmails({ ...volunteerEmails, [announcement.id]: e.target.value })}
-                    className="h-8 text-sm bg-background/50 border-primary/30"
-                  />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-3 border-t border-primary/20">
+                  <div className="flex items-center gap-2 flex-1">
+                    <UserPlus className="w-4 h-4 text-primary flex-shrink-0 hidden sm:block" />
+                    <Input
+                      type="email"
+                      placeholder="Your email to volunteer"
+                      value={volunteerEmails[announcement.id] || ""}
+                      onChange={(e) => setVolunteerEmails({ ...volunteerEmails, [announcement.id]: e.target.value })}
+                      className="h-9 sm:h-8 text-sm bg-background/50 border-primary/30"
+                    />
+                  </div>
                   <Button
                     size="sm"
                     variant="hero"
                     onClick={() => handleVolunteerSignup(announcement.id)}
                     disabled={signingUpFor === announcement.id || !volunteerEmails[announcement.id]}
-                    className="h-8 px-3"
+                    className="h-9 sm:h-8 px-4 sm:px-3 w-full sm:w-auto"
                   >
                     {signingUpFor === announcement.id ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      "Sign Up"
+                      <>
+                        <UserPlus className="w-4 h-4 mr-1 sm:hidden" />
+                        Sign Up
+                      </>
                     )}
                   </Button>
                 </div>
@@ -284,7 +291,7 @@ export function Public() {
         </div>
 
         {/* Region Status Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
           {filteredRegions.map((region) => {
             const config = riskConfig[region.riskLevel];
             const Icon = config.icon;
@@ -389,29 +396,30 @@ export function Public() {
         </div>
 
         {/* Subscribe Section */}
-        <div className="glass-panel-elevated p-8 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Bell className="w-5 h-5 text-primary" />
-            <span className="text-sm font-medium text-primary">Alert Notifications</span>
+        <div className="glass-panel-elevated p-5 sm:p-8 text-center">
+          <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            <span className="text-xs sm:text-sm font-medium text-primary">Alert Notifications</span>
           </div>
-          <h2 className="text-2xl font-bold mb-2">Stay Informed</h2>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold mb-2">Stay Informed</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 max-w-md mx-auto">
             Subscribe to receive email alerts when hazard levels change in your selected region.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-3 max-w-lg mx-auto">
+            <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="email"
                 placeholder="Your email address"
                 value={subscribeEmail}
                 onChange={(e) => setSubscribeEmail(e.target.value)}
-                className="pl-10 bg-secondary border-border"
+                className="pl-10 h-11 sm:h-10 bg-secondary border-border"
               />
             </div>
             <Button
               variant="hero"
+              className="h-11 sm:h-10"
               onClick={handleSubscribe}
               disabled={!selectedRegion || !subscribeEmail || isSubscribing}
             >
@@ -421,12 +429,12 @@ export function Public() {
           </div>
 
           {selectedRegion ? (
-            <p className="text-sm text-primary mt-3">
+            <p className="text-xs sm:text-sm text-primary mt-3">
               Subscribing to: {regionStatuses.find((r) => r.id === selectedRegion)?.displayName}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground mt-3">
-              Click on a region above to select it for alerts
+            <p className="text-xs sm:text-sm text-muted-foreground mt-3">
+              Tap on a region above to select it for alerts
             </p>
           )}
         </div>

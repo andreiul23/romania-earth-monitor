@@ -153,30 +153,31 @@ export default function VolunteerManagement() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 p-3 sm:p-6">
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col gap-4">
             <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Users className="w-6 h-6 text-primary" />
+              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 Volunteer Management
               </h1>
-              <p className="text-muted-foreground text-sm mt-1">
-                View and contact all volunteers who signed up for announcements
+              <p className="text-muted-foreground text-xs sm:text-sm mt-1">
+                View and contact all volunteers who signed up
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-sm px-3 py-1">
-                {totalVolunteers} Total Volunteers
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+                {totalVolunteers} Volunteers
               </Badge>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleContactAll(allEmails)}
                 disabled={allEmails.length === 0}
+                className="h-8 text-xs sm:text-sm"
               >
-                <Mail className="w-4 h-4 mr-2" />
+                <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 Contact All
               </Button>
               <Button
@@ -184,6 +185,7 @@ export default function VolunteerManagement() {
                 size="sm"
                 onClick={fetchVolunteers}
                 disabled={isLoading}
+                className="h-8 w-8 p-0"
               >
                 <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
               </Button>
@@ -222,39 +224,41 @@ export default function VolunteerManagement() {
                   )}
                 >
                   {/* Announcement Header */}
-                  <div className="px-4 py-3 bg-gradient-to-r from-card to-card/50 border-b border-border flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Badge className={cn("text-xs", hazardColors[announcement.hazard_type] || hazardColors.hybrid)}>
-                        {announcement.hazard_type}
-                      </Badge>
-                      <span className="font-medium">{announcement.region_name}</span>
-                      {!announcement.is_active && (
-                        <Badge variant="secondary" className="text-xs">Inactive</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        <Users className="w-3 h-3 mr-1" />
-                        {announcement.volunteers.length} volunteers
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleContactAll(announcement.volunteers.map(v => v.email))}
-                        disabled={announcement.volunteers.length === 0}
-                        className="h-8"
-                      >
-                        <Mail className="w-4 h-4 mr-1" />
-                        Contact All
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteAnnouncement(announcement.id)}
-                        className="h-8 text-danger hover:text-danger hover:bg-danger/10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                  <div className="px-3 sm:px-4 py-3 bg-gradient-to-r from-card to-card/50 border-b border-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge className={cn("text-xs", hazardColors[announcement.hazard_type] || hazardColors.hybrid)}>
+                          {announcement.hazard_type}
+                        </Badge>
+                        <span className="font-medium text-sm sm:text-base">{announcement.region_name}</span>
+                        {!announcement.is_active && (
+                          <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 sm:gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          <Users className="w-3 h-3 mr-1" />
+                          {announcement.volunteers.length}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleContactAll(announcement.volunteers.map(v => v.email))}
+                          disabled={announcement.volunteers.length === 0}
+                          className="h-7 sm:h-8 px-2 sm:px-3 text-xs"
+                        >
+                          <Mail className="w-3.5 h-3.5 sm:mr-1" />
+                          <span className="hidden sm:inline">Contact</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteAnnouncement(announcement.id)}
+                          className="h-7 sm:h-8 w-7 sm:w-8 p-0 text-danger hover:text-danger hover:bg-danger/10"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -264,13 +268,13 @@ export default function VolunteerManagement() {
                   </div>
 
                   {/* Volunteers List */}
-                  <div className="p-4">
+                  <div className="p-3 sm:p-4">
                     {announcement.volunteers.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">
                         No volunteers have signed up yet
                       </p>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         {announcement.volunteers.map((volunteer) => (
                           <div
                             key={volunteer.id}
