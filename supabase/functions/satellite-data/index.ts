@@ -782,12 +782,25 @@ serve(async (req) => {
         });
       }
 
-      const accessToken = await getAccessToken();
+      // Fetch data from all sources in parallel, with graceful fallbacks
+      let sentinel2Products: ProductMetadata[] = [];
+      let sentinel1Products: ProductMetadata[] = [];
       
-      // Search for Sentinel data, fire hotspots, and GEE analysis in parallel
-      const [sentinel2Products, sentinel1Products, fireHotspots, geeAnalysis] = await Promise.all([
-        searchProducts(accessToken, regionId, 'sentinel-2', maxCloudCover || 30, daysBack || 30),
-        searchProducts(accessToken, regionId, 'sentinel-1', 100, daysBack || 30),
+      // Try to get Copernicus data (may fail if credentials invalid)
+      try {
+        const accessToken = await getAccessToken();
+        const [s2, s1] = await Promise.all([
+          searchProducts(accessToken, regionId, 'sentinel-2', maxCloudCover || 30, daysBack || 30),
+          searchProducts(accessToken, regionId, 'sentinel-1', 100, daysBack || 30),
+        ]);
+        sentinel2Products = s2;
+        sentinel1Products = s1;
+      } catch (e) {
+        console.log('[satellite-data] Copernicus unavailable, using GEE/FIRMS only');
+      }
+
+      // These don't require Copernicus credentials - always try
+      const [fireHotspots, geeAnalysis] = await Promise.all([
         getFireHotspots(region.bbox, Math.min(daysBack || 3, 10)),
         getGEEAnalysis(region.bbox, daysBack || 30),
       ]);
@@ -799,7 +812,7 @@ serve(async (req) => {
         regionName: region.name,
         bbox: region.bbox,
         indicators,
-        geeAnalysis, // GEE-derived NDVI and flood data
+        geeAnalysis,
         sentinel2Products: sentinel2Products.slice(0, 5),
         sentinel1Products: sentinel1Products.slice(0, 5),
         fireHotspots: fireHotspots.slice(0, 20),
