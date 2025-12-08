@@ -123,22 +123,22 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+            className="md:hidden p-2.5 -mr-1 rounded-lg hover:bg-secondary active:bg-secondary/80 transition-colors touch-manipulation"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             ) : (
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             )}
           </button>
         </div>
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-border/50 animate-fade-in">
-            <div className="flex flex-col gap-2">
+          <nav className="md:hidden py-3 border-t border-border/50 animate-fade-in">
+            <div className="flex flex-col gap-1">
               {publicNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -150,12 +150,13 @@ export function Header() {
                   >
                     <Button
                       variant="ghost"
+                      size="lg"
                       className={cn(
-                        "w-full justify-start gap-3",
+                        "w-full justify-start gap-3 h-12 text-base",
                         isActive && "bg-secondary"
                       )}
                     >
-                      <Icon className="w-4 h-4" />
+                      <Icon className="w-5 h-5" />
                       {item.label}
                     </Button>
                   </Link>
@@ -176,12 +177,13 @@ export function Header() {
                       >
                         <Button
                           variant="ghost"
+                          size="lg"
                           className={cn(
-                            "w-full justify-start gap-3",
+                            "w-full justify-start gap-3 h-12 text-base",
                             isActive && "bg-secondary"
                           )}
                         >
-                          <Icon className="w-4 h-4" />
+                          <Icon className="w-5 h-5" />
                           {item.label}
                         </Button>
                       </Link>
@@ -194,16 +196,17 @@ export function Header() {
               {user ? (
                 <Button
                   variant="ghost"
-                  className="w-full justify-start gap-3"
+                  size="lg"
+                  className="w-full justify-start gap-3 h-12 text-base"
                   onClick={handleSignOut}
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-5 h-5" />
                   Sign Out
                 </Button>
               ) : (
                 <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-3">
-                    <LogIn className="w-4 h-4" />
+                  <Button variant="ghost" size="lg" className="w-full justify-start gap-3 h-12 text-base">
+                    <LogIn className="w-5 h-5" />
                     Institutional Login
                   </Button>
                 </Link>

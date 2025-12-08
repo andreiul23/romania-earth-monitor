@@ -362,15 +362,15 @@ export function Public() {
         )}
 
         {/* Search */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="relative max-w-md mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search your city or region..."
+              placeholder="Search your region..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 h-12 text-base bg-card border-border"
+              className="pl-12 h-12 sm:h-11 text-base bg-card border-border"
             />
           </div>
         </div>
@@ -404,30 +404,31 @@ export function Public() {
                 <div
                   key={region.id}
                   className={cn(
-                    "glass-panel p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 cursor-pointer",
-                    selectedRegion === region.id && "ring-2 ring-primary"
+                    "glass-panel p-4 sm:p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.98] cursor-pointer",
+                    selectedRegion === region.id && "ring-2 ring-primary border-primary/40"
                   )}
                   onClick={() => setSelectedRegion(region.id === selectedRegion ? null : region.id)}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      <h3 className="font-semibold">{region.displayName}</h3>
+                  <div className="flex items-start justify-between mb-2 sm:mb-3 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                      <h3 className="font-semibold text-sm sm:text-base truncate">{region.displayName}</h3>
                     </div>
-                    <Badge className={cn("text-xs", config.bg, config.color)}>
+                    <Badge className={cn("text-[10px] sm:text-xs flex-shrink-0", config.bg, config.color)}>
                       <Icon className="w-3 h-3 mr-1" />
-                      {config.label}
+                      <span className="hidden sm:inline">{config.label}</span>
+                      <span className="sm:hidden">{config.label.split(' ')[0]}</span>
                     </Badge>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2 sm:space-y-3">
                     {/* Flood Risk */}
                     <div>
-                      <div className="flex items-center justify-between text-sm mb-1">
+                      <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                         <span className="text-muted-foreground flex items-center gap-1">
-                          <Waves className="w-3 h-3" /> Flood Risk
+                          <Waves className="w-3 h-3" /> Flood
                         </span>
-                        <span className={region.floodRisk > 50 ? "text-danger" : "text-foreground"}>
+                        <span className={region.floodRisk > 50 ? "text-danger font-medium" : "text-foreground"}>
                           {region.floodRisk}%
                         </span>
                       </div>
@@ -446,11 +447,11 @@ export function Public() {
 
                     {/* Fire Risk */}
                     <div>
-                      <div className="flex items-center justify-between text-sm mb-1">
+                      <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                         <span className="text-muted-foreground flex items-center gap-1">
-                          <Flame className="w-3 h-3" /> Fire Risk
+                          <Flame className="w-3 h-3" /> Fire
                         </span>
-                        <span className={region.fireRisk > 50 ? "text-danger" : "text-foreground"}>
+                        <span className={region.fireRisk > 50 ? "text-danger font-medium" : "text-foreground"}>
                           {region.fireRisk}%
                         </span>
                       </div>
@@ -469,9 +470,9 @@ export function Public() {
 
                     {/* Vegetation Health */}
                     <div>
-                      <div className="flex items-center justify-between text-sm mb-1">
+                      <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
                         <span className="text-muted-foreground flex items-center gap-1">
-                          <Leaf className="w-3 h-3" /> Vegetation
+                          <Leaf className="w-3 h-3" /> Veg
                         </span>
                         <span className="text-vegetation">{region.vegetationHealth}%</span>
                       </div>
@@ -484,12 +485,12 @@ export function Public() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
-                    <span className="text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between mt-3 sm:mt-4 pt-2 sm:pt-3 border-t border-border">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">
                       {lastCacheTime ? `Updated ${new Date(lastCacheTime).toLocaleTimeString()}` : "Loading..."}
                     </span>
                     {region.alerts > 0 && (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge variant="destructive" className="text-[10px] sm:text-xs px-1.5 sm:px-2">
                         {region.alerts} alert{region.alerts > 1 ? "s" : ""}
                       </Badge>
                     )}
